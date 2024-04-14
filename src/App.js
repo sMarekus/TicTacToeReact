@@ -39,9 +39,11 @@ function Board({ xIsNext, squares, onPlay }) {
       return;
     }
 
+    const row = Math.floor(i / 3);
+    const col = i % 3;
     const nextSquares = squares.slice();
     nextSquares[i] = xIsNext ? "X" : "O";
-    onPlay(nextSquares);
+    onPlay(nextSquares, {row, col, i});
   }
 
   let status;
@@ -84,15 +86,15 @@ function Board({ xIsNext, squares, onPlay }) {
 }
 
 export default function Game() {
-  const [history, setHistory] = useState([Array(9).fill(null)]);
+  const [history, setHistory] = useState([{squares: Array(9).fill(null), lastMove: null}]);
   const [currentMove, setCurrentMove] = useState(0);
   const [isAscending, setIsAscending] = useState(true);
 
   const xIsNext = currentMove % 2 === 0;
-  const currentSquares = history[currentMove];
+  const currentSquares = history[currentMove].squares;
 
-  function handlePlay(nextSquares) {
-    const nextHistory = history.slice(0, currentMove + 1).concat([nextSquares]);
+  function handlePlay(nextSquares, moveDetails) {
+    const nextHistory = history.slice(0, currentMove + 1).concat([{squares: nextSquares, lastMove: moveDetails}]);
     setHistory(nextHistory);
     setCurrentMove(nextHistory.length - 1);
   }
@@ -107,7 +109,7 @@ export default function Game() {
 
   const moves = history.map((squares, move) => {
     const desc = move ?
-      `Go to move #${move}` :
+      `Go to move #${move} (row: ${squares.lastMove.row + 1}), col: ${squares.lastMove.col + 1})` :
       'Go to game start';
 
     return (
